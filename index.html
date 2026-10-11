@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>雨霖之旅</title>
+<title>雨霖之旅 Rainforest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Familjen+Grotesk:wght@400;500;700&family=Nanum+Pen+Script&display=swap">
@@ -48,7 +48,8 @@ h2 { font-family: var(--block); font-weight: 400; font-size: clamp(2.2rem, 5vw, 
 
 /* Header */
 header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
-.brand { font-family: var(--hand); font-size: 2.3rem; line-height: 1; text-decoration: none; }
+.brand { display: inline-flex; align-items: baseline; gap: 10px; font-family: var(--hand); font-size: 2.3rem; line-height: 1; text-decoration: none; }
+.brand-en { font-family: var(--body); font-size: 1rem; font-weight: 500; letter-spacing: 0.02em; color: var(--muted); }
 nav { display: flex; gap: clamp(14px, 3vw, 30px); flex-wrap: wrap; }
 nav a { text-decoration: none; font-weight: 500; }
 nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
@@ -201,7 +202,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; a
 
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#top">雨霖之旅</a>
+    <a class="brand" href="#top">雨霖之旅<span class="brand-en">Rainforest</span></a>
     <nav>
       <a href="#trip">追光之旅</a>
       <a href="#episodes">Episodes</a>
@@ -286,7 +287,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; a
 
 <footer>
   <div class="wrap">
-    <span>© 2026 雨霖之旅</span>
+    <span>© 2026 雨霖之旅 Rainforest</span>
     <div class="socials">
       <a href="https://www.youtube.com/">YouTube</a>
       <a href="https://www.instagram.com/">Instagram</a>
