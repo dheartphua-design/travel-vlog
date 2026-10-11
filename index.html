@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Far Afield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: field-notebook — a big "now playing" episode up top, a filterable episode wall, then the route ledger of every leg travelled. */
+:root {
+  --bg: #F2F4F1;
+  --surface: #FFFFFF;
+  --ink: #15222A;
+  --muted: #586970;
+  --line: #D8DFDC;
+  --accent: #0F6B74;
+  --accent-ink: #FFFFFF;
+  --sun: #D98E1F;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D161B; --surface: #142128; --ink: #E7EDEB; --muted: #91A3A8;
+    --line: #233339; --accent: #52B8C1; --accent-ink: #08252A; --sun: #F0B354;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D161B; --surface: #142128; --ink: #E7EDEB; --muted: #91A3A8;
+  --line: #233339; --accent: #52B8C1; --accent-ink: #08252A; --sun: #F0B354;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 16px; line-height: 1.55;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+.mono { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.05; }
+
+/* Nav */
+header.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+}
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.brand { display: flex; align-items: baseline; gap: 10px; text-decoration: none; }
+.brand b { font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em; }
+.brand span { color: var(--sun); font-family: var(--mono); font-size: 0.72rem; }
+nav { display: flex; gap: clamp(12px, 3vw, 28px); flex-wrap: wrap; }
+nav a { text-decoration: none; font-weight: 500; font-size: 0.95rem; color: var(--muted); }
+nav a:hover { color: var(--ink); }
+
+/* Hero */
+.hero { padding-block: clamp(28px, 5vw, 56px) clamp(32px, 5vw, 64px); }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: end; }
+.hero-media { position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 16 / 9; max-width: 100%; background: var(--line); }
+.hero-media canvas, .thumb canvas { display: block; width: 100%; height: 100%; }
+.hero-copy { display: grid; gap: 18px; min-width: 0; }
+.hero-copy h1 { font-size: clamp(2.3rem, 5.4vw, 4.4rem); font-weight: 800; letter-spacing: -0.035em; }
+.hero-copy p { margin: 0; color: var(--muted); max-width: 44ch; font-size: 1.05rem; }
+.coords { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); }
+.coords b { color: var(--ink); font-weight: 500; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; justify-self: start;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none;
+  font-weight: 600; padding: 12px 20px; border-radius: 999px; border: 0;
+  transition: transform .15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn svg { width: 14px; height: 14px; fill: currentColor; }
+.live-tag { position: absolute; top: 14px; left: 14px; background: var(--sun); color: #1B1406; padding: 4px 10px; border-radius: 3px; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* Stats */
+.stats { border-block: 1px solid var(--line); }
+.stats .wrap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stat { padding-block: 22px; display: grid; gap: 2px; }
+.stat + .stat { border-left: 1px solid var(--line); padding-left: clamp(12px, 3vw, 28px); }
+.stat strong { font-family: var(--display); font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+/* Sections */
+section.block { padding-block: clamp(48px, 7vw, 88px) 0; }
+.section-head { display: flex; justify-content: space-between; align-items: end; gap: 16px 24px; flex-wrap: wrap; margin-bottom: 28px; }
+.section-head h2 { font-size: clamp(1.8rem, 3.6vw, 2.7rem); font-weight: 700; letter-spacing: -0.025em; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: 500 0.85rem var(--body); color: var(--muted); background: transparent;
+  border: 1px solid var(--line); padding: 7px 14px; border-radius: 999px; cursor: pointer;
+}
+.chip:hover { color: var(--ink); border-color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 32px 24px; }
+.ep { display: grid; gap: 12px; text-decoration: none; min-width: 0; }
+.thumb { position: relative; aspect-ratio: 16 / 9; border-radius: 5px; overflow: hidden; background: var(--line); max-width: 100%; }
+.thumb .rt { position: absolute; right: 8px; bottom: 8px; background: rgba(10, 16, 20, .78); color: #fff; padding: 2px 7px; border-radius: 3px; }
+.thumb .play {
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity .2s ease;
+  background: rgba(10, 16, 20, .25);
+}
+.thumb .play svg { width: 46px; height: 46px; }
+.ep:hover .play, .ep:focus-visible .play { opacity: 1; }
+.ep:hover canvas { transform: scale(1.03); }
+.ep canvas { transition: transform .5s ease; }
+.ep-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
+.ep h3 { font-size: 1.22rem; font-weight: 700; letter-spacing: -0.01em; }
+.ep p { margin: 0; color: var(--muted); font-size: 0.93rem; }
+.empty { color: var(--muted); padding: 24px 0; }
+
+/* Ledger */
+.ledger-wrap { overflow-x: auto; border-top: 2px solid var(--ink); }
+table { width: 100%; border-collapse: collapse; min-width: 620px; }
+th, td { text-align: left; padding: 14px 12px 14px 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+th { font-family: var(--mono); font-weight: 400; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td .arrow { color: var(--sun); padding-inline: 6px; }
+.mode { display: inline-block; font-family: var(--mono); font-size: 0.72rem; border: 1px solid var(--line); border-radius: 3px; padding: 1px 7px; color: var(--muted); }
+tfoot td { border-bottom: 0; font-weight: 600; }
+
+/* About */
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: clamp(24px, 5vw, 64px); align-items: start; }
+.about h2 { font-size: clamp(2rem, 4.4vw, 3.4rem); font-weight: 800; letter-spacing: -0.03em; }
+.about-copy { display: grid; gap: 16px; max-width: 62ch; }
+.about-copy p { margin: 0; font-size: 1.06rem; }
+.kit { display: flex; flex-wrap: wrap; gap: 8px; }
+.kit span { font-family: var(--mono); font-size: 0.75rem; background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; border-radius: 3px; }
+
+footer { margin-top: clamp(56px, 8vw, 96px); border-top: 1px solid var(--line); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding-block: 28px; color: var(--muted); }
+.socials { display: flex; flex-wrap: wrap; gap: 18px; }
+.socials a { text-decoration: none; font-weight: 500; color: var(--ink); }
+.socials a:hover { color: var(--accent); }
+
+@media (max-width: 820px) {
+  .hero-grid, .about { grid-template-columns: minmax(0, 1fr); }
+  .stats .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { border-left: 0; padding-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 520px) { nav a:not(.keep) { display: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><b>Far Afield</b><span>EST. 2024</span></a>
+    <nav>
+      <a class="keep" href="#episodes">Episodes</a>
+      <a href="#route">Route</a>
+      <a class="keep" href="#about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <a class="hero-media" id="heroMedia" href="https://www.youtube.com/" aria-label="Watch the latest episode on YouTube">
+        <canvas id="heroCanvas"></canvas>
+        <span class="live-tag">New episode</span>
+      </a>
+      <div class="hero-copy">
+        <div class="eyebrow" id="heroEyebrow">Episode 24 · Lofoten, Norway</div>
+        <h1 id="heroTitle">Chasing the midnight sun</h1>
+        <p id="heroBlurb"></p>
+        <div class="coords mono" id="heroCoords"></div>
+        <a class="btn" id="heroBtn" href="https://www.youtube.com/">
+          <svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>
+          Watch on YouTube
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="wrap" id="stats"></div>
+  </div>
+
+  <section class="block" id="episodes">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">The archive</div>
+          <h2>Every episode</h2>
+        </div>
+        <div class="chips" id="chips" role="group" aria-label="Filter by region"></div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="block" id="route">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Route ledger</div>
+          <h2>How I got there</h2>
+        </div>
+        <p class="mono" style="margin:0;color:var(--muted)">Great-circle distance, rounded to the nearest 10 km</p>
+      </div>
+      <div class="ledger-wrap">
+        <table>
+          <thead><tr><th>Leg</th><th>From → To</th><th>Mode</th><th class="num">Distance</th><th class="num">Time</th></tr></thead>
+          <tbody id="ledger"></tbody>
+          <tfoot><tr><td></td><td>Total so far</td><td></td><td class="num" id="ledgerKm"></td><td class="num" id="ledgerHrs"></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="about">
+    <div class="wrap about">
+      <div>
+        <div class="eyebrow">Behind the camera</div>
+        <h2>Slow travel, one carry-on, no itinerary.</h2>
+      </div>
+      <div class="about-copy">
+        <p>Far Afield is a travel vlog about the places between the famous ones. I film the overnight trains, the market stalls before they open, and the conversations that happen when a plan falls apart.</p>
+        <p>New episodes go up every other Sunday. Each one is shot on a single trip, edited on the road, and comes with a free guide to where I stayed, ate, and got lost.</p>
+        <div class="kit">
+          <span>Sony ZV-E10</span><span>DJI Mini 4 Pro</span><span>Rode Wireless GO II</span><span>40 L backpack</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">© 2026 Far Afield</span>
+    <div class="socials">
+      <a href="https://www.youtube.com/">YouTube</a>
+      <a href="https://www.instagram.com/">Instagram</a>
+      <a href="https://www.tiktok.com/">TikTok</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Sample content: replace with your real episodes and links.
+const EPISODES = [
+  { n: 24, place: "Lofoten, Norway", region: "Europe", title: "Chasing the midnight sun", blurb: "Ten days of fishing villages, red rorbu cabins, and a sun that refuses to set. We hike Reinebringen at 1 a.m. in full daylight.", lat: 67.93, lon: 13.09, rt: "22:10", date: "Oct 2026", scene: "mountains", pal: ["#F6B26B", "#FDE3C2", "#FFD27A", ["#5E7C8C", "#3B5566", "#1F3340"]] },
+  { n: 23, place: "Kyoto, Japan", region: "Asia", title: "48 hours of temples and tofu", blurb: "Fushimi Inari before sunrise, a twelve-course yudofu lunch, and the quietest bamboo grove in the city.", lat: 35.01, lon: 135.77, rt: "18:42", date: "Sep 2026", scene: "city", pal: ["#E7A1A8", "#F8DCD4", "#FFF1E0", ["#B26B78", "#7A4153", "#3E2234"]] },
+  { n: 22, place: "Oaxaca, Mexico", region: "Americas", title: "Mole, mezcal and markets", blurb: "Seven moles in three days and a morning at a family palenque in Santiago Matatlán.", lat: 17.07, lon: -96.73, rt: "16:05", date: "Aug 2026", scene: "dunes", pal: ["#F28C4B", "#FBD38D", "#FFF0B8", ["#D2693C", "#A3462A", "#5E2A1E"]] },
+  { n: 21, place: "Hội An, Vietnam", region: "Asia", title: "Lantern nights on the Thu Bồn", blurb: "Tailors, bánh mì Phượng, and a sunset boat ride through the old town.", lat: 15.88, lon: 108.33, rt: "14:58", date: "Jul 2026", scene: "sea", pal: ["#F5A04B", "#FFD9A0", "#FFEFC4", ["#2F7C82", "#1D5960", "#0F343A"]] },
+  { n: 20, place: "Cappadocia, Türkiye", region: "Europe", title: "Up before the balloons", blurb: "A cave hotel in Göreme, a 4:30 a.m. alarm, and the valley filling with a hundred balloons.", lat: 38.64, lon: 34.83, rt: "13:30", date: "Jun 2026", scene: "dunes", pal: ["#8FB5D9", "#F5D3B3", "#FFE6C7", ["#D9A47E", "#B07A57", "#6E4A35"]] },
+  { n: 19, place: "Marrakech, Morocco", region: "Africa", title: "Lost in the medina", blurb: "Navigating Jemaa el-Fnaa, a cooking class in a riad, and two nights in the Agafay desert.", lat: 31.63, lon: -7.99, rt: "19:20", date: "May 2026", scene: "dunes", pal: ["#E9895F", "#F7C59F", "#FFE3B5", ["#E0A15E", "#C47A3C", "#8A4D24"]] },
+  { n: 18, place: "Torres del Paine, Chile", region: "Americas", title: "Five days on the W Trek", blurb: "Wind, glaciers, and the base of the towers at dawn. Full packing list in the description.", lat: -50.94, lon: -72.99, rt: "24:47", date: "Mar 2026", scene: "mountains", pal: ["#A9C6DE", "#E3EEF5", "#FFFFFF", ["#7B93A8", "#4E6478", "#26394A"]] },
+  { n: 17, place: "Tasmania, Australia", region: "Oceania", title: "Road trip to Cradle Mountain", blurb: "Wombats, Wineglass Bay, and the best scallop pie I've ever eaten.", lat: -41.68, lon: 145.95, rt: "17:12", date: "Jan 2026", scene: "sea", pal: ["#7FB2D8", "#CFE5F2", "#FFF7DD", ["#3E7D6A", "#28594B", "#16352E"]] }
+];
+
+const LEGS = [
+  { from: "Singapore", to: "Hobart", mode: "Flight", km: 6260, hrs: 9.5 },
+  { from: "Santiago", to: "Puerto Natales", mode: "Flight + bus", km: 2050, hrs: 7 },
+  { from: "Madrid", to: "Marrakech", mode: "Flight", km: 1100, hrs: 2 },
+  { from: "Istanbul", to: "Kayseri", mode: "Overnight bus", km: 680, hrs: 11 },
+  { from: "Da Nang", to: "Hội An", mode: "Scooter", km: 30, hrs: 0.75 },
+  { from: "Mexico City", to: "Oaxaca", mode: "Bus", km: 360, hrs: 6.5 },
+  { from: "Osaka", to: "Kyoto", mode: "Train", km: 40, hrs: 0.5 },
+  { from: "Bodø", to: "Moskenes", mode: "Ferry", km: 100, hrs: 3.5 }
+];
+
+// Seeded random so each thumbnail is stable across reloads
+function rng(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+function paint(canvas, ep) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = canvas.clientWidth || 640, h = canvas.clientHeight || 360;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const c = canvas.getContext("2d"); c.scale(dpr, dpr);
+  const [skyTop, skyBot, sunCol, layers] = ep.pal;
+  const r = rng(ep.n * 977 + 13);
+
+  const sky = c.createLinearGradient(0, 0, 0, h);
+  sky.addColorStop(0, skyTop); sky.addColorStop(1, skyBot);
+  c.fillStyle = sky; c.fillRect(0, 0, w, h);
+
+  const sx = w * (0.25 + r() * 0.5), sy = h * (0.28 + r() * 0.15), sr = h * 0.11;
+  const glow = c.createRadialGradient(sx, sy, 0, sx, sy, sr * 4);
+  glow.addColorStop(0, sunCol); glow.addColorStop(1, "rgba(255,255,255,0)");
+  c.fillStyle = glow; c.fillRect(0, 0, w, h);
+  c.fillStyle = sunCol; c.beginPath(); c.arc(sx, sy, sr, 0, Math.PI * 2); c.fill();
+
+  layers.forEach((col, i) => {
+    const base = h * (0.52 + i * 0.15);
+    c.fillStyle = col; c.beginPath(); c.moveTo(0, h);
+    if (ep.scene === "mountains") {
+      let x = 0; c.lineTo(0, base);
+      while (x < w) { x += w * (0.06 + r() * 0.1); c.lineTo(x, base - r() * h * (0.32 - i * 0.08)); }
+    } else if (ep.scene === "dunes") {
+      const amp = h * (0.06 - i * 0.012), f = 1.5 + r() * 2, ph = r() * 6;
+      for (let x = 0; x <= w; x += 6) c.lineTo(x, base + Math.sin(x / w * Math.PI * f + ph) * amp);
+    } else if (ep.scene === "sea") {
+      if (i === 0) { c.lineTo(0, base - h * 0.05); c.quadraticCurveTo(w * 0.3, base - h * 0.2, w * 0.55, base - h * 0.04); c.lineTo(w, base - h * 0.02); }
+      else { c.lineTo(0, base - h * 0.06); c.lineTo(w, base - h * 0.06); }
+    } else {
+      let x = 0; c.lineTo(0, base);
+      while (x < w) {
+        const bw = w * (0.04 + r() * 0.07), bh = h * (0.08 + r() * (0.28 - i * 0.07));
+        c.lineTo(x, base - bh);
+        if (i === 0 && r() > 0.7) { c.lineTo(x + bw / 2, base - bh - h * 0.08); }
+        c.lineTo(x + bw, base - bh); x += bw;
+      }
+    }
+    c.lineTo(w, h); c.closePath(); c.fill();
+  });
+
+  if (ep.scene === "sea") {
+    c.strokeStyle = "rgba(255,255,255,0.35)"; c.lineWidth = 1.5;
+    for (let k = 0; k < 9; k++) {
+      const y = h * (0.7 + r() * 0.28), x = r() * w, len = w * (0.04 + r() * 0.08);
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x + len, y); c.stroke();
+    }
+  }
+}
+
+const fmtCoord = (v, pos, neg) => `${Math.abs(v).toFixed(2)}° ${v >= 0 ? pos : neg}`;
+const playIcon = `<svg viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="23" fill="rgba(255,255,255,.92)"/><path d="M18 14l14 9-14 9z" fill="#15222A"/></svg>`;
+
+// Hero
+const latest = EPISODES[0];
+document.getElementById("heroEyebrow").textContent = `Episode ${latest.n} · ${latest.place}`;
+document.getElementById("heroTitle").textContent = latest.title;
+document.getElementById("heroBlurb").textContent = latest.blurb;
+document.getElementById("heroCoords").innerHTML =
+  `<span><b>${fmtCoord(latest.lat, "N", "S")}, ${fmtCoord(latest.lon, "E", "W")}</b></span><span>Runtime ${latest.rt}</span><span>${latest.date}</span>`;
+
+// Stats
+const countries = new Set(EPISODES.map(e => e.place.split(", ").pop())).size;
+const totalKm = LEGS.reduce((s, l) => s + l.km, 0);
+document.getElementById("stats").innerHTML = [
+  [EPISODES.length, "Episodes"], [countries, "Countries"],
+  [totalKm.toLocaleString("en-US"), "Kilometres"], [new Set(EPISODES.map(e => e.region)).size, "Continents"]
+].map(([v, l]) => `<div class="stat"><strong>${v}</strong><span class="eyebrow">${l}</span></div>`).join("");
+
+// Episode grid + filters
+const regions = ["All", ...new Set(EPISODES.map(e => e.region))];
+let active = "All";
+try { const saved = localStorage.getItem("farafield-region"); if (regions.includes(saved)) active = saved; } catch (e) {}
+
+const chips = document.getElementById("chips");
+const grid = document.getElementById("grid");
+
+function render() {
+  chips.innerHTML = regions.map(r => `<button class="chip" type="button" aria-pressed="${r === active}" data-r="${r}">${r}</button>`).join("");
+  const list = EPISODES.filter(e => active === "All" || e.region === active);
+  grid.innerHTML = list.length ? list.map(e => `
+    <a class="ep" href="https://www.youtube.com/" aria-label="Watch episode ${e.n}: ${e.title}">
+      <div class="thumb"><canvas data-n="${e.n}"></canvas><span class="rt mono">${e.rt}</span><span class="play">${playIcon}</span></div>
+      <div class="ep-meta mono"><span>EP ${String(e.n).padStart(2, "0")} · ${e.place}</span><span>${e.date}</span></div>
+      <h3>${e.title}</h3>
+      <p>${e.blurb}</p>
+    </a>`).join("") : `<p class="empty">No episodes from this region yet.</p>`;
+  grid.querySelectorAll("canvas").forEach(cv => paint(cv, EPISODES.find(e => e.n === +cv.dataset.n)));
+}
+chips.addEventListener("click", ev => {
+  const b = ev.target.closest(".chip"); if (!b) return;
+  active = b.dataset.r;
+  try { localStorage.setItem("farafield-region", active); } catch (e) {}
+  render();
+});
+
+// Ledger
+document.getElementById("ledger").innerHTML = LEGS.map((l, i) => `
+  <tr><td class="mono">${String(i + 1).padStart(2, "0")}</td>
+  <td>${l.from}<span class="arrow">→</span>${l.to}</td>
+  <td><span class="mode">${l.mode}</span></td>
+  <td class="num mono">${l.km.toLocaleString("en-US")} km</td>
+  <td class="num mono">${l.hrs} h</td></tr>`).join("");
+document.getElementById("ledgerKm").textContent = totalKm.toLocaleString("en-US") + " km";
+document.getElementById("ledgerHrs").textContent = LEGS.reduce((s, l) => s + l.hrs, 0) + " h";
+
+function paintAll() { paint(document.getElementById("heroCanvas"), latest); render(); }
+paintAll();
+let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(paintAll, 150); });
+</script>
+</body>
+</html>
