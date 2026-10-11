@@ -20,8 +20,8 @@
   --stock-muted: #646C8A;
   --stamp-red: #B8322A;
   --shadow: rgba(29, 43, 83, 0.18);
-  --hand: "Nanum Pen Script", "Bradley Hand", "Segoe Print", cursive;
-  --block: "Anton", "Impact", "Arial Narrow Bold", sans-serif;
+  --hand: "Nanum Pen Script", "Bradley Hand", "Segoe Print", "Kaiti SC", "STKaiti", cursive;
+  --block: "Anton", "Impact", "Arial Narrow Bold", "PingFang SC", "Noto Sans SC", sans-serif;
   --body: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -126,6 +126,32 @@ section.block { padding-block: clamp(40px, 6vw, 72px); border-top: 1px solid var
 .caption span { color: var(--muted); font-size: 0.9rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .empty { color: var(--muted); }
 
+/* Trip prints */
+.ep-sub { font-size: 1rem; color: var(--stock-muted); margin-top: -4px; }
+.prints { display: grid; gap: clamp(32px, 5vw, 56px); }
+.day { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 16px clamp(20px, 4vw, 48px); align-items: start; }
+.day-head { display: grid; gap: 2px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+.day-n { font-family: var(--hand); font-size: 2.6rem; line-height: 1; font-weight: 400; color: var(--stamp-red); }
+.day-date { font-size: 0.95rem; font-weight: 500; color: var(--muted); }
+.day-prints { columns: 3 220px; column-gap: clamp(18px, 2.6vw, 32px); }
+@media (max-width: 700px) {
+  .day { grid-template-columns: minmax(0, 1fr); }
+  .day-head { position: static; grid-template-columns: auto 1fr; align-items: baseline; gap: 12px; }
+}
+.print {
+  display: block; width: 100%; break-inside: avoid; margin: 0 0 clamp(24px, 3vw, 36px);
+  background: var(--stock); color: var(--stock-ink); padding: 10px 10px 6px; border: 0; text-align: left;
+  font: inherit; cursor: zoom-in; transform: rotate(var(--tilt, 0deg));
+  box-shadow: 0 1px 1px var(--shadow), 0 14px 30px -12px var(--shadow);
+}
+figure.print { cursor: default; }
+.print img, .print video { display: block; width: 100%; height: auto; max-width: 100%; background: #1D2B53; }
+.cap { display: block; font-family: var(--hand); font-size: 1.4rem; line-height: 1.1; padding: 8px 4px 2px; margin: 0; }
+.viewer { border: 0; padding: 12px; background: var(--stock); color: var(--stock-ink); max-width: min(94vw, 1100px); max-height: 94vh; }
+.viewer::backdrop { background: rgba(10, 14, 25, 0.84); }
+.viewer img { display: block; max-width: 100%; max-height: 78vh; width: auto; height: auto; margin: 0 auto; }
+.viewer-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 8px; }
+
 /* Route */
 .route { list-style: none; margin: 0; padding: 0; counter-reset: leg; }
 .route li { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) auto; gap: 6px 16px; align-items: baseline; padding-block: 16px; border-bottom: 1px solid var(--rule); }
@@ -177,6 +203,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; a
   <div class="wrap">
     <a class="brand" href="#top">Far Afield</a>
     <nav>
+      <a href="#trip">追光之旅</a>
       <a href="#episodes">Episodes</a>
       <a href="#route">Route</a>
       <a href="#about">About</a>
@@ -191,6 +218,23 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; a
       <article class="open-card card" id="openCard" aria-labelledby="heroTitle"></article>
     </div>
   </section>
+
+  <section class="block" id="trip">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>北欧追光之旅</h2>
+          <p>Five days in Lofoten, Norway, 15 to 19 November 2025. Click a photo to see it bigger, or play a clip.</p>
+        </div>
+      </div>
+      <div class="prints" id="prints"></div>
+    </div>
+  </section>
+
+  <dialog class="viewer" id="viewer" aria-label="Photo">
+    <img id="viewerImg" alt="">
+    <div class="viewer-foot"><p class="cap" id="viewerCap"></p><button class="btn" type="button" id="viewerClose">Close</button></div>
+  </dialog>
 
   <section class="block" id="episodes">
     <div class="wrap">
@@ -254,7 +298,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; a
 <script>
 // Sample content: replace with your real episodes and links.
 const EPISODES = [
-  { n: 24, word: "Lofoten", place: "Lofoten, Norway", region: "Europe", title: "Chasing the midnight sun", note: "Ten days of fishing villages and red cabins, and the sun just won't set. Hiked Reinebringen at 1 a.m. in full daylight!", lat: 67.93, lon: 13.09, rt: "22:10", date: "Oct 2026", url: "https://www.youtube.com/", scene: "mountains", pal: ["#F6B26B", "#FDE3C2", "#FFD27A", ["#5E7C8C", "#3B5566", "#1F3340"]] },
+  { n: 24, word: "Lofoten", place: "Lofoten, Norway", region: "Europe", title: "北欧追光之旅", sub: "Chasing the northern lights in Lofoten", note: "Snow on everything and barely any daylight. Then one night the whole sky over the peaks turned green. Worth every frozen finger.", lat: 68.23, lon: 13.95, rt: "22:10", date: "Nov 2025", url: "https://www.youtube.com/", photo: "media/nordic-7544.jpg", scene: "mountains", pal: ["#2E4A3A", "#6FA37E", "#C9F2C4", ["#5E7C8C", "#3B5566", "#1F3340"]] },
   { n: 23, word: "Kyoto", place: "Kyoto, Japan", region: "Asia", title: "48 hours of temples and tofu", note: "Fushimi Inari before sunrise, then a twelve-course tofu lunch. Found the quiet bamboo grove.", lat: 35.01, lon: 135.77, rt: "18:42", date: "Sep 2026", url: "https://www.youtube.com/", scene: "city", pal: ["#E7A1A8", "#F8DCD4", "#FFF1E0", ["#B26B78", "#7A4153", "#3E2234"]] },
   { n: 22, word: "Oaxaca", place: "Oaxaca, Mexico", region: "Americas", title: "Mole, mezcal and markets", note: "Seven moles in three days. Spent a morning at a family palenque in Matatlán.", lat: 17.07, lon: -96.73, rt: "16:05", date: "Aug 2026", url: "https://www.youtube.com/", scene: "dunes", pal: ["#F28C4B", "#FBD38D", "#FFF0B8", ["#D2693C", "#A3462A", "#5E2A1E"]] },
   { n: 21, word: "Hội An", place: "Hội An, Vietnam", region: "Asia", title: "Lantern nights on the Thu Bồn", note: "Got a jacket made in 24 hours, ate three bánh mì, and took a lantern boat at dusk.", lat: 15.88, lon: 108.33, rt: "14:58", date: "Jul 2026", url: "https://www.youtube.com/", scene: "sea", pal: ["#F5A04B", "#FFD9A0", "#FFEFC4", ["#2F7C82", "#1D5960", "#0F343A"]] },
@@ -263,6 +307,43 @@ const EPISODES = [
   { n: 18, word: "Patagonia", place: "Torres del Paine, Chile", region: "Americas", title: "Five days on the W Trek", note: "Wind, glaciers, and the towers turning pink at dawn. Packing list is in the description.", lat: -50.94, lon: -72.99, rt: "24:47", date: "Mar 2026", url: "https://www.youtube.com/", scene: "mountains", pal: ["#A9C6DE", "#E3EEF5", "#FFFFFF", ["#7B93A8", "#4E6478", "#26394A"]] },
   { n: 17, word: "Tasmania", place: "Tasmania, Australia", region: "Oceania", title: "Road trip to Cradle Mountain", note: "Wombats on the trail, Wineglass Bay from above, and the best scallop pie of my life.", lat: -41.68, lon: 145.95, rt: "17:12", date: "Jan 2026", url: "https://www.youtube.com/", scene: "sea", pal: ["#7FB2D8", "#CFE5F2", "#FFF7DD", ["#3E7D6A", "#28594B", "#16352E"]] }
 ];
+
+// Photos and footage from the 北欧追光之旅 trip
+const V = (n, cap, w = 720, h = 1280) => ({ video: `media/nordic-${n}.mp4`, poster: `media/nordic-${n}-poster.jpg`, w, h, cap });
+const P = (n, cap, tall = true) => ({ src: `media/nordic-${n}.jpg`, w: tall ? 1350 : 1800, h: tall ? 1800 : 1350, cap });
+const TRIP = [
+  { day: "Saturday 15 November", items: [
+    V(7334, "An iron ore train sliding through town"),
+    V(7355, "Someone wrapped a snow tree in fairy lights")
+  ] },
+  { day: "Sunday 16 November", items: [
+    P(7441, "Ice caught in last summer's flowers"),
+    P(7488, "Grey morning, snow on every roof"),
+    V(7482, "Blue hour on the fjord", 1280, 720),
+    P(7519, "Waiting: stars, the fjord, a faint glow", false),
+    P(7522, "Still green through the clouds", false),
+    P(7543, "Then it started to dance"),
+    P(7544, "The arc right over the peaks")
+  ] },
+  { day: "Monday 17 November", items: [
+    P(7627, "Noon, and the sun is as high as it gets"),
+    V(7648, "Hamnøy: red cabins under the peak"),
+    P(7686, "A yellow cabin and a mountain in the mist"),
+    P(7717, "Harbour lights by mid-afternoon", false),
+    P(7730, "A little green indoors")
+  ] },
+  { day: "Tuesday 18 November", items: [
+    P(7813, "Birches after a night of snow", false),
+    P(7814, "Same trees, a few steps on", false),
+    P(7818, "Snowy stairs up the hill"),
+    P(7916, "A row of rorbuer on the water", false),
+    P(8012, "An oil lamp in the green room")
+  ] },
+  { day: "Wednesday 19 November", items: [
+    P(8053, "Last morning at the rorbu", false)
+  ] }
+];
+const FLAT = TRIP.flatMap(d => d.items);
 
 const LEGS = [
   { from: "Singapore", to: "Hobart", mode: "flew", km: 6260, hrs: 9.5 },
@@ -324,6 +405,22 @@ function scene(c, w, h, ep) {
   }
 }
 
+// Real photos replace the drawn landscape once they've loaded
+const imgCache = {};
+function photoFor(ep) {
+  if (!ep.photo) return null;
+  let im = imgCache[ep.photo];
+  if (!im) { im = imgCache[ep.photo] = new Image(); im.onload = () => paintAll(); im.src = ep.photo; }
+  return im.complete && im.naturalWidth ? im : null;
+}
+function art(c, w, h, ep) {
+  const im = photoFor(ep);
+  if (!im) return scene(c, w, h, ep);
+  const s = Math.max(w / im.naturalWidth, h / im.naturalHeight);
+  const dw = im.naturalWidth * s, dh = im.naturalHeight * s;
+  c.drawImage(im, (w - dw) / 2, (h - dh) * 0.45, dw, dh);
+}
+
 function sizeCanvas(cv) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const w = cv.clientWidth || 300, h = cv.clientHeight || 200;
@@ -338,10 +435,10 @@ function paintFront(cv, ep) {
   const off = document.createElement("canvas");
   off.width = cv.width; off.height = cv.height;
   const oc = off.getContext("2d"); oc.setTransform(dpr, 0, 0, dpr, 0, 0);
-  scene(oc, w, h, ep);
+  art(oc, w, h, ep);
 
   c.drawImage(off, 0, 0, w, h);
-  c.fillStyle = "rgba(251, 248, 240, 0.74)"; c.fillRect(0, 0, w, h);
+  c.fillStyle = `rgba(251, 248, 240, ${ep.photo ? 0.66 : 0.74})`; c.fillRect(0, 0, w, h);
 
   c.fillStyle = "#1D2B53"; c.textBaseline = "alphabetic"; c.textAlign = "left";
   c.font = `${Math.round(h * 0.15)}px "Nanum Pen Script", cursive`;
@@ -367,7 +464,7 @@ function paintFront(cv, ep) {
   c.fillText(ep.place.split(", ").pop(), w * 0.93, h * 0.92);
 }
 
-function paintStamp(cv, ep) { const { c, w, h } = sizeCanvas(cv); scene(c, w, h, ep); }
+function paintStamp(cv, ep) { const { c, w, h } = sizeCanvas(cv); art(c, w, h, ep); }
 
 function postmark(ep, id) {
   const [mon, yr] = ep.date.split(" ");
@@ -390,8 +487,9 @@ document.getElementById("openCard").innerHTML = `
   <div class="face-front"><canvas data-front="${latest.n}" role="img" aria-label="Greetings from ${esc(latest.word)} postcard"></canvas></div>
   <div class="back">
     <div class="message">
-      <span class="ep-num">Newest episode, number ${latest.n}</span>
+      <span class="ep-num">Latest trip, episode ${latest.n}</span>
       <h1 id="heroTitle">${esc(latest.title)}</h1>
+      ${latest.sub ? `<span class="ep-sub">${esc(latest.sub)}</span>` : ""}
       <p class="note">${esc(latest.note)}</p>
       <span class="sign">Wish you were here</span>
     </div>
@@ -461,6 +559,30 @@ tabs.addEventListener("click", ev => {
   try { localStorage.setItem("farafield-region", active); } catch (e) {}
   renderRack();
 });
+
+// Trip prints + viewer
+const printHTML = p => {
+  const i = FLAT.indexOf(p), tilt = [0.6, -1, 0.9, -0.5, 1.1, -0.8][i % 6];
+  return p.video
+    ? `<figure class="print" style="--tilt:${tilt}deg"><video src="${p.video}" poster="${p.poster}" width="${p.w}" height="${p.h}" playsinline controls preload="none"></video><figcaption class="cap">${esc(p.cap)}</figcaption></figure>`
+    : `<button class="print" type="button" style="--tilt:${tilt}deg" data-i="${i}" aria-label="View larger: ${esc(p.cap)}"><img src="${p.src}" width="${p.w}" height="${p.h}" alt="${esc(p.cap)}" loading="lazy"><span class="cap">${esc(p.cap)}</span></button>`;
+};
+document.getElementById("prints").innerHTML = TRIP.map((d, n) => `
+  <div class="day">
+    <h3 class="day-head"><span class="day-n">Day ${n + 1}</span><span class="day-date">${d.day}</span></h3>
+    <div class="day-prints">${d.items.map(printHTML).join("")}</div>
+  </div>`).join("");
+const viewer = document.getElementById("viewer");
+document.getElementById("prints").addEventListener("click", ev => {
+  const b = ev.target.closest("button.print"); if (!b) return;
+  const p = FLAT[+b.dataset.i];
+  document.getElementById("viewerImg").src = p.src;
+  document.getElementById("viewerImg").alt = p.cap;
+  document.getElementById("viewerCap").textContent = p.cap;
+  if (viewer.showModal) viewer.showModal(); else viewer.setAttribute("open", "");
+});
+document.getElementById("viewerClose").addEventListener("click", () => viewer.close ? viewer.close() : viewer.removeAttribute("open"));
+viewer.addEventListener("click", ev => { if (ev.target === viewer && viewer.close) viewer.close(); });
 
 // Route
 document.getElementById("routeList").innerHTML = LEGS.map((l, i) => `
